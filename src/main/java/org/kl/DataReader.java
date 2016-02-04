@@ -13,7 +13,7 @@ public class DataReader {
 		System.out.println(data);
 	}
 
-	public static String getKey() {
+	public String getKey() {
 		// TODO Auto-generated method stub
 		return null;
 	}
